@@ -254,7 +254,10 @@ function userUrl(id) {
 }
 
 function tagsApiUrl(id) {
-  return `/api/tags/${encodeURIComponent(id)}`;
+  const local = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+  if (local) return `/api/tags/${encodeURIComponent(id)}`;
+  // Direct function URL is most reliable on Netlify
+  return `/.netlify/functions/tags?id=${encodeURIComponent(id)}`;
 }
 
 async function fetchTagsApi(id, options = {}, timeoutMs = 20000) {
