@@ -1,4 +1,12 @@
-const { MongoClient } = require("mongodb");
+const dns = require("dns");
+const { MongoClient, ServerApiVersion } = require("mongodb");
+
+// Fix SSL alert 80 on Netlify / Node 20+
+try {
+  dns.setDefaultResultOrder("ipv4first");
+} catch {
+  /* older node */
+}
 
 const headers = {
   "Content-Type": "application/json",
@@ -10,7 +18,8 @@ const headers = {
 let cachedClient = null;
 
 function getUri() {
-  const uri = process.env.MONGODB_URI;
+  let uri = process.env.MONGODB_URI || "";
+  uri = uri.trim().replace(/^["']|["']$/g, "");
   if (!uri) {
     throw new Error("MONGODB_URI is not set in Netlify environment variables");
   }
@@ -33,11 +42,16 @@ async function getClient() {
   }
 
   const client = new MongoClient(getUri(), {
+    // Critical for Netlify SSL alert 80
+    autoSelectFamily: false,
     family: 4,
-    tls: true,
-    serverSelectionTimeoutMS: 10000,
-    connectTimeoutMS: 10000,
-    maxIdleTimeMS: 10000,
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: false,
+      deprecationErrors: false,
+    },
+    serverSelectionTimeoutMS: 12000,
+    connectTimeoutMS: 12000,
   });
 
   await client.connect();
@@ -60,7 +74,6 @@ function getId(event) {
   if (event.queryStringParameters?.id) {
     return event.queryStringParameters.id;
   }
-
   const parts = (event.path || "").split("/").filter(Boolean);
   const last = parts[parts.length - 1];
   if (last && last !== "tags") return last;
@@ -72,7 +85,12 @@ async function withRetry(fn) {
     return await fn();
   } catch (err) {
     const msg = String(err && err.message);
-    if (msg.includes("Topology is closed") || msg.includes("topology was destroyed")) {
+    if (
+      msg.includes("Topology is closed") ||
+      msg.includes("topology was destroyed") ||
+      msg.includes("SSL") ||
+      msg.includes("tlsv1")
+    ) {
       cachedClient = null;
       return await fn();
     }
