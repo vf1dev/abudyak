@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Petty — Smart Pet Tag</title>
+  <meta name="description" content="The smart NFC & QR pet tag that helps lost pets find their way home." />
+  <meta property="og:image" content="assets/features.jpg" />
+  <meta name="twitter:image" content="assets/features.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- NAV -->
+  <header class="site-header" id="site-header">
+    <div class="container header-inner">
+      <a href="#top" class="brand">
+        <svg class="icon accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+        Petty
+      </a>
+      <nav class="nav-links" aria-label="Main">
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#gallery">Gallery</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <a href="#order" class="btn btn-primary btn-sm">
+        Order
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section id="top" class="hero">
+      <div class="blob blob-tr"></div>
+      <div class="blob blob-bl"></div>
+      <div class="container hero-grid">
+        <div class="animate-reveal">
+          <span class="badge">
+            <svg class="icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+            Smart Pet Tag
+          </span>
+          <h1>Never Lose <br /> Your Best Friend.</h1>
+          <p class="lead">
+            The smart NFC &amp; QR pet tag that helps lost pets find their way home — instantly, safely, and beautifully designed.
+          </p>
+          <div class="btn-row">
+            <a href="#order" class="btn btn-accent group">
+              Order Now
+              <svg class="icon-sm arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+            <a href="#features" class="btn btn-outline">Learn More</a>
+          </div>
+          <div class="trust-row">
+            <div class="trust-item">
+              <svg class="icon-sm primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              No batteries
+            </div>
+            <div class="trust-item">
+              <svg class="icon-sm primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              iOS &amp; Android
+            </div>
+            <div class="trust-item">
+              <svg class="icon-sm primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              Waterproof
+            </div>
+          </div>
+        </div>
+        <div class="relative animate-reveal">
+          <div class="img-glow"></div>
+          <div class="media-frame animate-float">
+            <img src="assets/features.jpg" alt="Petty smart pet tag" loading="eager" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COLORS -->
+    <section class="colors-section">
+      <div class="container colors-grid">
+        <div class="reveal media-frame-lg order-2">
+          <img src="assets/tag-colors.jpg" alt="Petty tags in five colors" />
+        </div>
+        <div class="reveal order-1">
+          <span class="eyebrow accent-text">Choose your color</span>
+          <h2>One tag. Five personalities.</h2>
+          <p class="section-lead muted-on-dark">
+            Match Petty to your pet's vibe. Every tag is built with the same premium 3D-printed shell and NFC + QR chip inside.
+          </p>
+          <div class="color-swatches" id="color-swatches" role="listbox" aria-label="Tag colors"></div>
+          <div class="selected-pill">
+            <span class="pulse-dot"></span>
+            Selected: <strong id="selected-color">Black</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="section">
+      <div class="container">
+        <div class="max-w-2xl reveal">
+          <span class="eyebrow accent-text">Features</span>
+          <h2 class="text-primary">Small tag. Big peace of mind.</h2>
+        </div>
+        <div class="features-grid" id="features-grid"></div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how" class="section section-alt">
+      <div class="container">
+        <div class="text-center max-w-2xl mx-auto reveal">
+          <span class="eyebrow accent-text">How it works</span>
+          <h2 class="text-primary">Four steps to bring them home</h2>
+        </div>
+        <div class="steps-grid" id="steps-grid"></div>
+      </div>
+    </section>
+
+    <!-- BENEFITS -->
+    <section class="section">
+      <div class="container benefits-grid">
+        <div class="reveal">
+          <span class="eyebrow accent-text">Why Petty</span>
+          <h2 class="text-primary">Built to last. Designed to belong.</h2>
+          <p class="section-lead">
+            Every Petty tag is 3D printed with premium materials and tested for real-world adventures — from muddy trails to sudden downpours.
+          </p>
+          <div class="benefits-list" id="benefits-list"></div>
+        </div>
+        <div class="reveal relative">
+          <div class="img-glow accent-glow"></div>
+          <div class="media-frame-md">
+            <img src="assets/collar.jpg" alt="Petty tag on a collar" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GALLERY -->
+    <section id="gallery" class="section section-alt">
+      <div class="container">
+        <div class="max-w-2xl reveal">
+          <span class="eyebrow accent-text">Gallery</span>
+          <h2 class="text-primary">See Petty in the wild</h2>
+        </div>
+        <div class="gallery-grid" id="gallery-grid"></div>
+      </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section class="section">
+      <div class="container">
+        <div class="text-center max-w-2xl mx-auto reveal">
+          <span class="eyebrow accent-text">Loved by pet parents</span>
+          <h2 class="text-primary">Stories from the pack</h2>
+        </div>
+        <div class="reviews-grid" id="reviews-grid"></div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="section section-alt">
+      <div class="container narrow">
+        <div class="text-center reveal">
+          <span class="eyebrow accent-text">FAQ</span>
+          <h2 class="text-primary">Questions, answered.</h2>
+        </div>
+        <div class="faq-list" id="faq-list"></div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section id="order" class="section">
+      <div class="container cta-wrap">
+        <div class="reveal cta-box">
+          <div class="blob cta-blob-tl"></div>
+          <div class="blob cta-blob-br"></div>
+          <div class="cta-content">
+            <svg class="icon-xl accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+            <h2>Bring them home. <br /> Every time.</h2>
+            <p>Join thousands of pet parents who trust Petty with the ones they love most.</p>
+            <a href="#" class="btn btn-accent btn-lg">
+              Order Your Petty Tag
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <div class="brand brand-lg">
+          <svg class="icon accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+          Petty
+        </div>
+        <p>Small tag. Big peace of mind. Designed for pet parents who never want to say goodbye.</p>
+        <div class="socials">
+          <a href="#" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+          </a>
+          <a href="#" aria-label="Facebook">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          </a>
+          <a href="#" aria-label="Twitter">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div>
+        <p class="footer-heading">Company</p>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer-heading">Contact</p>
+        <ul>
+          <li class="contact-email">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/></svg>
+            hello@petty.pet
+          </li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <span id="copyright">© 2026 Petty. All rights reserved.</span>
+      <span>Made with ♥ for pets everywhere.</span>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

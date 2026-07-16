@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Petty — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header scrolled" id="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand">
+        <svg class="icon accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+        Petty
+      </a>
+      <a href="index.html" class="btn btn-primary btn-sm">العودة للموقع</a>
+    </div>
+  </header>
+
+  <main class="admin-page">
+    <div class="container admin-box">
+      <span class="eyebrow accent-text">Admin</span>
+      <h1 class="text-primary">إنشاء QR Code</h1>
+      <p class="admin-hint">ينشئ رمزاً فريداً يفتح صفحة التسجيل لأول مرة، ثم صفحة المعلومات بعد التسجيل.</p>
+
+      <button type="button" id="generate-btn" class="btn btn-accent">إنشاء QR جديد</button>
+      <p id="qr-error" class="admin-error" hidden></p>
+
+      <div id="qr-preview" class="qr-preview" hidden>
+        <img id="qr-image" alt="QR Code" width="220" height="220" />
+        <p class="admin-link-label">الرابط</p>
+        <code id="qr-link" class="admin-link"></code>
+        <a id="download-btn" class="btn btn-primary btn-sm" href="#" download="petty-qr.png">تحميل</a>
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
