@@ -259,7 +259,7 @@ function tagsApiUrl(id) {
   return `/.netlify/functions/tags?id=${encodeURIComponent(id)}`;
 }
 
-async function fetchTagsApi(id, options = {}, timeoutMs = 12000) {
+async function fetchTagsApi(id, options = {}, timeoutMs = 20000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -379,12 +379,8 @@ function setupNewUserPage() {
       console.error(err);
       showError(
         err.name === "AbortError"
-          ? "انتهت مهلة الاتصال بـ MongoDB. تحقق من Network Access (0.0.0.0/0) وأعد النشر."
-          : err.message && err.message.includes("MONGODB_URI")
-            ? "أضف MONGODB_URI في إعدادات Netlify ثم أعد النشر."
-            : err.message && err.message.includes("SSL")
-              ? "خطأ SSL مع MongoDB. أعد نشر الموقع بعد التحديث، وتأكد من 0.0.0.0/0 في Atlas."
-              : "تعذر الاتصال بقاعدة البيانات. أعد نشر الموقع على Netlify."
+          ? "انتهت مهلة الاتصال. أعد المحاولة بعد نشر الموقع."
+          : "تعذر الاتصال. أعد نشر الموقع على Netlify."
       );
     });
 
@@ -416,10 +412,8 @@ function setupNewUserPage() {
       console.error(err);
       showError(
         err.name === "AbortError"
-          ? "انتهت مهلة الحفظ. فعّل 0.0.0.0/0 في Atlas Network Access ثم أعد المحاولة."
-          : err.message && err.message.includes("MONGODB_URI")
-            ? "أضف MONGODB_URI في إعدادات Netlify ثم أعد النشر."
-            : `تعذر الحفظ: ${err.message || "خطأ غير معروف"}`
+          ? "انتهت مهلة الحفظ. أعد المحاولة."
+          : `تعذر الحفظ: ${err.message || "خطأ غير معروف"}`
       );
       if (submitBtn) {
         submitBtn.disabled = false;
