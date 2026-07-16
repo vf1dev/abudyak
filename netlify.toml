@@ -8,12 +8,6 @@
   external_node_modules = ["@netlify/blobs"]
 
 [[redirects]]
-  from = "/api/tags/:id"
-  to = "/.netlify/functions/tags?id=:id"
-  status = 200
-  force = true
-
-[[redirects]]
   from = "/newuser"
   to = "/newuser/index.html"
   status = 200
