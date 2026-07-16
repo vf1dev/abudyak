@@ -1,13 +1,15 @@
 [build]
+  command = "npm install"
   publish = "."
   functions = "netlify/functions"
 
 [functions]
   node_bundler = "nft"
+  external_node_modules = ["mongodb"]
 
 [[redirects]]
   from = "/api/tags/:id"
-  to = "/.netlify/functions/tags/:id"
+  to = "/.netlify/functions/tags?id=:id"
   status = 200
   force = true
 

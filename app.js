@@ -256,7 +256,10 @@ function userUrl(id) {
 async function getTag(id) {
   const res = await fetch(`/api/tags/${encodeURIComponent(id)}`);
   if (res.status === 404) return null;
-  if (!res.ok) throw new Error("fetch_failed");
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.message || "fetch_failed");
+  }
   return res.json();
 }
 
@@ -272,7 +275,10 @@ async function saveTag(id, data) {
     return { conflict: true, tag: body.tag };
   }
 
-  if (!res.ok) throw new Error("save_failed");
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.message || "save_failed");
+  }
   return { conflict: false, tag: await res.json() };
 }
 
@@ -342,8 +348,11 @@ function setupNewUserPage() {
     .then((tag) => {
       if (tag) window.location.replace(userUrl(id));
     })
-    .catch(() => {
-      errorEl.textContent = "تعذر الاتصال بالخادم. شغّل الموقع عبر npm start.";
+    .catch((err) => {
+      errorEl.textContent =
+        err.message && err.message.includes("MONGODB_URI")
+          ? "أضف MONGODB_URI في إعدادات Netlify ثم أعد النشر."
+          : "تعذر الاتصال. تأكد من إعدادات Netlify وMongoDB.";
       errorEl.hidden = false;
     });
 
@@ -362,8 +371,11 @@ function setupNewUserPage() {
     try {
       await saveTag(id, { ownerName, phone, petName });
       window.location.replace(userUrl(id));
-    } catch {
-      errorEl.textContent = "تعذر الحفظ. تأكد أن السيرفر يعمل.";
+    } catch (err) {
+      errorEl.textContent =
+        err.message && err.message.includes("MONGODB_URI")
+          ? "أضف MONGODB_URI في إعدادات Netlify ثم أعد النشر."
+          : "تعذر الحفظ. تحقق من MongoDB وNetwork Access في Atlas.";
       errorEl.hidden = false;
     }
   });
