@@ -253,18 +253,39 @@ function userUrl(id) {
   return `${window.location.origin}/user?id=${encodeURIComponent(id)}`;
 }
 
+function tagsApiUrl(id) {
+  const local = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+  if (local) return `/api/tags/${encodeURIComponent(id)}`;
+  return `/.netlify/functions/tags?id=${encodeURIComponent(id)}`;
+}
+
+async function fetchTagsApi(id, options = {}, timeoutMs = 12000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(tagsApiUrl(id), {
+      ...options,
+      signal: controller.signal,
+    });
+    return res;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function getTag(id) {
-  const res = await fetch(`/api/tags/${encodeURIComponent(id)}`);
+  const res = await fetchTagsApi(id);
   if (res.status === 404) return null;
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.message || "fetch_failed");
+    throw new Error(body.message || `fetch_failed_${res.status}`);
   }
   return res.json();
 }
 
 async function saveTag(id, data) {
-  const res = await fetch(`/api/tags/${encodeURIComponent(id)}`, {
+  const res = await fetchTagsApi(id, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -277,7 +298,7 @@ async function saveTag(id, data) {
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.message || "save_failed");
+    throw new Error(body.message || `save_failed_${res.status}`);
   }
   return { conflict: false, tag: await res.json() };
 }
@@ -335,11 +356,17 @@ function setupNewUserPage() {
   if (!form) return;
 
   const errorEl = document.getElementById("form-error");
+  const submitBtn = form.querySelector('button[type="submit"]');
   const id = getQueryId();
 
+  function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.hidden = !msg;
+    if (msg) console.error(msg);
+  }
+
   if (!id) {
-    errorEl.textContent = "رمز غير صالح. امسح الـ QR من جديد.";
-    errorEl.hidden = false;
+    showError("رمز غير صالح. امسح الـ QR من جديد.");
     form.hidden = true;
     return;
   }
@@ -349,34 +376,53 @@ function setupNewUserPage() {
       if (tag) window.location.replace(userUrl(id));
     })
     .catch((err) => {
-      errorEl.textContent =
-        err.message && err.message.includes("MONGODB_URI")
-          ? "أضف MONGODB_URI في إعدادات Netlify ثم أعد النشر."
-          : "تعذر الاتصال. تأكد من إعدادات Netlify وMongoDB.";
-      errorEl.hidden = false;
+      console.error(err);
+      showError(
+        err.name === "AbortError"
+          ? "انتهت مهلة الاتصال بـ MongoDB. تحقق من Network Access (0.0.0.0/0) وأعد النشر."
+          : err.message && err.message.includes("MONGODB_URI")
+            ? "أضف MONGODB_URI في إعدادات Netlify ثم أعد النشر."
+            : "تعذر الاتصال بقاعدة البيانات. أعد نشر الموقع على Netlify."
+      );
     });
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    e.stopPropagation();
+
     const ownerName = document.getElementById("owner-name").value.trim();
     const phone = document.getElementById("phone").value.trim();
     const petName = document.getElementById("pet-name").value.trim();
 
     if (!ownerName || !phone || !petName) {
-      errorEl.textContent = "أكمل جميع الحقول.";
-      errorEl.hidden = false;
+      showError("أكمل جميع الحقول.");
       return;
     }
 
+    const oldText = submitBtn ? submitBtn.textContent : "";
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "جاري الحفظ...";
+    }
+    showError("");
+
     try {
+      console.log("Saving tag", id);
       await saveTag(id, { ownerName, phone, petName });
       window.location.replace(userUrl(id));
     } catch (err) {
-      errorEl.textContent =
-        err.message && err.message.includes("MONGODB_URI")
-          ? "أضف MONGODB_URI في إعدادات Netlify ثم أعد النشر."
-          : "تعذر الحفظ. تحقق من MongoDB وNetwork Access في Atlas.";
-      errorEl.hidden = false;
+      console.error(err);
+      showError(
+        err.name === "AbortError"
+          ? "انتهت مهلة الحفظ. فعّل 0.0.0.0/0 في Atlas Network Access ثم أعد المحاولة."
+          : err.message && err.message.includes("MONGODB_URI")
+            ? "أضف MONGODB_URI في إعدادات Netlify ثم أعد النشر."
+            : `تعذر الحفظ: ${err.message || "خطأ غير معروف"}`
+      );
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = oldText || "حفظ";
+      }
     }
   });
 }

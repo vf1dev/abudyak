@@ -16,7 +16,10 @@ async function getCollection() {
   }
 
   if (!cachedClient) {
-    cachedClient = new MongoClient(uri);
+    cachedClient = new MongoClient(uri, {
+      serverSelectionTimeoutMS: 8000,
+      connectTimeoutMS: 8000,
+    });
     await cachedClient.connect();
   }
 

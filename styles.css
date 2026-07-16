@@ -1085,6 +1085,13 @@ h2 {
 .admin-error {
   color: #b42318;
   font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.admin-form .btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
+  transform: none;
 }
 
 .qr-preview {
