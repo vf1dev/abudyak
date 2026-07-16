@@ -382,7 +382,9 @@ function setupNewUserPage() {
           ? "انتهت مهلة الاتصال بـ MongoDB. تحقق من Network Access (0.0.0.0/0) وأعد النشر."
           : err.message && err.message.includes("MONGODB_URI")
             ? "أضف MONGODB_URI في إعدادات Netlify ثم أعد النشر."
-            : "تعذر الاتصال بقاعدة البيانات. أعد نشر الموقع على Netlify."
+            : err.message && err.message.includes("SSL")
+              ? "خطأ SSL مع MongoDB. أعد نشر الموقع بعد التحديث، وتأكد من 0.0.0.0/0 في Atlas."
+              : "تعذر الاتصال بقاعدة البيانات. أعد نشر الموقع على Netlify."
       );
     });
 

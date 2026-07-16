@@ -17,8 +17,11 @@ async function getCollection() {
 
   if (!cachedClient) {
     cachedClient = new MongoClient(uri, {
-      serverSelectionTimeoutMS: 8000,
-      connectTimeoutMS: 8000,
+      // Netlify/AWS Lambda: IPv6 causes TLS alert 80 with Atlas
+      family: 4,
+      tls: true,
+      serverSelectionTimeoutMS: 10000,
+      connectTimeoutMS: 10000,
     });
     await cachedClient.connect();
   }
