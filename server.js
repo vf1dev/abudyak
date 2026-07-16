@@ -1,55 +1,42 @@
-const fs = require("fs");
+require("dotenv").config();
+
 const path = require("path");
 const express = require("express");
+const { findTag, createTag } = require("./lib/tagsDb");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-const DATA_FILE = path.join(__dirname, "data", "tags.json");
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static(__dirname));
 
-function readTags() {
+app.get("/api/tags/:id", async (req, res) => {
   try {
-    return JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
-  } catch {
-    return {};
+    const tag = await findTag(req.params.id);
+    if (!tag) return res.status(404).json({ error: "not_found" });
+    res.json(tag);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "server_error" });
   }
-}
-
-function writeTags(tags) {
-  fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
-  fs.writeFileSync(DATA_FILE, JSON.stringify(tags, null, 2), "utf8");
-}
-
-app.get("/api/tags/:id", (req, res) => {
-  const tags = readTags();
-  const tag = tags[req.params.id];
-  if (!tag) return res.status(404).json({ error: "not_found" });
-  res.json(tag);
 });
 
-app.post("/api/tags/:id", (req, res) => {
-  const { ownerName, phone, petName } = req.body || {};
-  if (!ownerName || !phone || !petName) {
-    return res.status(400).json({ error: "missing_fields" });
+app.post("/api/tags/:id", async (req, res) => {
+  try {
+    const { ownerName, phone, petName } = req.body || {};
+    if (!ownerName || !phone || !petName) {
+      return res.status(400).json({ error: "missing_fields" });
+    }
+
+    const result = await createTag(req.params.id, { ownerName, phone, petName });
+    if (result.conflict) {
+      return res.status(409).json({ error: "already_registered", tag: result.tag });
+    }
+    res.status(201).json(result.tag);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "server_error" });
   }
-
-  const tags = readTags();
-  if (tags[req.params.id]) {
-    return res.status(409).json({ error: "already_registered", tag: tags[req.params.id] });
-  }
-
-  const tag = {
-    ownerName: String(ownerName).trim(),
-    phone: String(phone).trim(),
-    petName: String(petName).trim(),
-    createdAt: Date.now(),
-  };
-
-  tags[req.params.id] = tag;
-  writeTags(tags);
-  res.status(201).json(tag);
 });
 
 app.get("/newuser", (req, res) => {

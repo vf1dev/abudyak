@@ -1,0 +1,22 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "nft"
+
+[[redirects]]
+  from = "/api/tags/:id"
+  to = "/.netlify/functions/tags/:id"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/newuser"
+  to = "/newuser/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/user"
+  to = "/user/index.html"
+  status = 200
