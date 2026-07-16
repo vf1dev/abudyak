@@ -9,24 +9,45 @@ const headers = {
 
 let cachedClient = null;
 
-async function getCollection() {
+function getUri() {
   const uri = process.env.MONGODB_URI;
   if (!uri) {
     throw new Error("MONGODB_URI is not set in Netlify environment variables");
   }
+  return uri;
+}
 
-  if (!cachedClient) {
-    cachedClient = new MongoClient(uri, {
-      // Netlify/AWS Lambda: IPv6 causes TLS alert 80 with Atlas
-      family: 4,
-      tls: true,
-      serverSelectionTimeoutMS: 10000,
-      connectTimeoutMS: 10000,
-    });
-    await cachedClient.connect();
+async function getClient() {
+  if (cachedClient) {
+    try {
+      await cachedClient.db("admin").command({ ping: 1 });
+      return cachedClient;
+    } catch {
+      try {
+        await cachedClient.close();
+      } catch {
+        /* ignore */
+      }
+      cachedClient = null;
+    }
   }
 
-  return cachedClient.db("petty").collection("tags");
+  const client = new MongoClient(getUri(), {
+    family: 4,
+    tls: true,
+    serverSelectionTimeoutMS: 10000,
+    connectTimeoutMS: 10000,
+    maxIdleTimeMS: 10000,
+  });
+
+  await client.connect();
+  cachedClient = client;
+  return cachedClient;
+}
+
+async function getCollection() {
+  const client = await getClient();
+  return client.db("petty").collection("tags");
 }
 
 function toTag(doc) {
@@ -46,6 +67,19 @@ function getId(event) {
   return null;
 }
 
+async function withRetry(fn) {
+  try {
+    return await fn();
+  } catch (err) {
+    const msg = String(err && err.message);
+    if (msg.includes("Topology is closed") || msg.includes("topology was destroyed")) {
+      cachedClient = null;
+      return await fn();
+    }
+    throw err;
+  }
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 204, headers, body: "" };
@@ -57,10 +91,12 @@ exports.handler = async (event) => {
       return { statusCode: 400, headers, body: JSON.stringify({ error: "missing_id" }) };
     }
 
-    const col = await getCollection();
-
     if (event.httpMethod === "GET") {
-      const tag = toTag(await col.findOne({ _id: id }));
+      const tag = await withRetry(async () => {
+        const col = await getCollection();
+        return toTag(await col.findOne({ _id: id }));
+      });
+
       if (!tag) {
         return { statusCode: 404, headers, body: JSON.stringify({ error: "not_found" }) };
       }
@@ -75,29 +111,39 @@ exports.handler = async (event) => {
         return { statusCode: 400, headers, body: JSON.stringify({ error: "missing_fields" }) };
       }
 
-      const existing = await col.findOne({ _id: id });
-      if (existing) {
+      const result = await withRetry(async () => {
+        const col = await getCollection();
+        const existing = await col.findOne({ _id: id });
+        if (existing) {
+          return { conflict: true, tag: toTag(existing) };
+        }
+
+        const tag = {
+          ownerName: String(ownerName).trim(),
+          phone: String(phone).trim(),
+          petName: String(petName).trim(),
+          createdAt: Date.now(),
+        };
+
+        await col.insertOne({ _id: id, ...tag });
+        return { conflict: false, tag };
+      });
+
+      if (result.conflict) {
         return {
           statusCode: 409,
           headers,
-          body: JSON.stringify({ error: "already_registered", tag: toTag(existing) }),
+          body: JSON.stringify({ error: "already_registered", tag: result.tag }),
         };
       }
 
-      const tag = {
-        ownerName: String(ownerName).trim(),
-        phone: String(phone).trim(),
-        petName: String(petName).trim(),
-        createdAt: Date.now(),
-      };
-
-      await col.insertOne({ _id: id, ...tag });
-      return { statusCode: 201, headers, body: JSON.stringify(tag) };
+      return { statusCode: 201, headers, body: JSON.stringify(result.tag) };
     }
 
     return { statusCode: 405, headers, body: JSON.stringify({ error: "method_not_allowed" }) };
   } catch (err) {
     console.error(err);
+    cachedClient = null;
     return {
       statusCode: 500,
       headers,
