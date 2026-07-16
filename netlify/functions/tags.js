@@ -1,3 +1,5 @@
+const { getStore, connectLambda } = require("@netlify/blobs");
+
 const headers = {
   "Content-Type": "application/json",
   "Access-Control-Allow-Origin": "*",
@@ -7,51 +9,33 @@ const headers = {
 
 function getId(event) {
   if (event.queryStringParameters?.id) return event.queryStringParameters.id;
-
   const parts = (event.path || "").split("/").filter(Boolean);
   const last = parts[parts.length - 1];
   if (last && last !== "tags") return last;
   return null;
 }
 
-function pantryBasketUrl() {
-  const pantryId = (process.env.PANTRY_ID || "").trim();
-  if (!pantryId) {
-    throw new Error("أضف PANTRY_ID في Netlify Environment variables من getpantry.cloud");
+function getTagsStore(event) {
+  try {
+    if (typeof connectLambda === "function") connectLambda(event);
+  } catch {
+    /* ignore */
   }
-  return `https://getpantry.cloud/apiv1/pantry/${encodeURIComponent(pantryId)}/basket/petty-tags`;
-}
 
-async function readTags() {
-  const res = await fetch(pantryBasketUrl());
-  if (res.status === 400 || res.status === 404) return {};
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || `pantry_read_${res.status}`);
+  const siteID =
+    process.env.SITE_ID ||
+    process.env.NETLIFY_SITE_ID ||
+    process.env.BLOBS_SITE_ID;
+  const token =
+    process.env.NETLIFY_AUTH_TOKEN ||
+    process.env.NETLIFY_TOKEN ||
+    process.env.BLOBS_TOKEN;
+
+  if (siteID && token) {
+    return getStore({ name: "petty-tags", siteID, token });
   }
-  const data = await res.json().catch(() => ({}));
-  return data && typeof data === "object" ? data : {};
-}
 
-async function writeTags(tags) {
-  let res = await fetch(pantryBasketUrl(), {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(tags),
-  });
-
-  if (res.ok) return;
-
-  res = await fetch(pantryBasketUrl(), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(tags),
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || `pantry_write_${res.status}`);
-  }
+  return getStore("petty-tags");
 }
 
 exports.handler = async (event) => {
@@ -65,9 +49,10 @@ exports.handler = async (event) => {
       return { statusCode: 400, headers, body: JSON.stringify({ error: "missing_id" }) };
     }
 
+    const store = getTagsStore(event);
+
     if (event.httpMethod === "GET") {
-      const tags = await readTags();
-      const tag = tags[id];
+      const tag = await store.get(id, { type: "json" });
       if (!tag) {
         return { statusCode: 404, headers, body: JSON.stringify({ error: "not_found" }) };
       }
@@ -82,12 +67,12 @@ exports.handler = async (event) => {
         return { statusCode: 400, headers, body: JSON.stringify({ error: "missing_fields" }) };
       }
 
-      const tags = await readTags();
-      if (tags[id]) {
+      const existing = await store.get(id, { type: "json" });
+      if (existing) {
         return {
           statusCode: 409,
           headers,
-          body: JSON.stringify({ error: "already_registered", tag: tags[id] }),
+          body: JSON.stringify({ error: "already_registered", tag: existing }),
         };
       }
 
@@ -98,18 +83,21 @@ exports.handler = async (event) => {
         createdAt: Date.now(),
       };
 
-      tags[id] = tag;
-      await writeTags(tags);
+      await store.setJSON(id, tag);
       return { statusCode: 201, headers, body: JSON.stringify(tag) };
     }
 
     return { statusCode: 405, headers, body: JSON.stringify({ error: "method_not_allowed" }) };
   } catch (err) {
     console.error(err);
+    const message = String(err.message || err);
+    const hint = message.includes("not been configured")
+      ? "أضف SITE_ID و NETLIFY_AUTH_TOKEN في Environment variables على Netlify ثم أعد النشر"
+      : message;
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: "server_error", message: err.message || String(err) }),
+      body: JSON.stringify({ error: "server_error", message: hint }),
     };
   }
 };
